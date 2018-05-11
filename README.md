@@ -1,2 +1,2 @@
 # cloud-workshop
-# Add on confiuration files and deployment files repository 
+# Kubernetes addons confiuration files and deployment files repository 
