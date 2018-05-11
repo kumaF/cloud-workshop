@@ -1,0 +1,7 @@
+//autoscale deployment
+
+kubectl autoscale deployment nginx-deployment --cpu-percent=10 --min=1 --max=4
+
+
+for((i=0 ; i<1000 ; i++)); do curl "192.168.56.6:30080"; done
+
