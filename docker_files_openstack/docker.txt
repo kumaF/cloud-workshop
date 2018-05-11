@@ -1,0 +1,8 @@
+
+//build image 
+docker build -f <file_name> -t <image_name>:<tag>  .
+(e.g - docker build -f dockerfile2 -t dockerweb-image:v2  . ) 
+
+//run image
+docker run --name <name_container> -d -ti  -p <host_port>:<container_port> <image_name>:<tag>
+(e.g - docker run -d -ti  -p 8092:80 dockerweb-image:v2  ) 

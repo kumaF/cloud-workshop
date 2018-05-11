@@ -1,0 +1,9 @@
+FROM    centos
+
+ENV http_proxy=10.58.74.77:8080
+ENV https_proxy=10.58.74.77:8080
+
+RUN yum -y install httpd httpd-tools
+RUN yum -y install php
+
+CMD     ["/usr/sbin/httpd","-D","FOREGROUND"]
