@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: workshop-deployment
   labels:
-    name: nginx
+    name: workshop-web
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: nginx
+      name: workshop-web
   template:
     metadata:
       labels:
-        name: nginx
+        name: workshop-web
     spec:
       containers:
-      - name: nginx
+      - name: workshop-web
         image: dockerweb-image:v2
         ports:
         - containerPort: 80
@@ -24,9 +24,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx
+  name: workshop-web
   labels:
-    name: nginx
+    name: workshop-web
 spec:
   type: NodePort
   ports:
@@ -34,4 +34,4 @@ spec:
       nodePort: 30080
       name: http
   selector:
-    name: nginx
+    name: workshop-web
