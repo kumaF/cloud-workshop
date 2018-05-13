@@ -3,4 +3,6 @@ FROM    centos
 RUN yum -y install httpd httpd-tools
 RUN yum -y install php
 
+COPY dockerfile1.php /var/www/html/index.php
+
 CMD     ["/usr/sbin/httpd","-D","FOREGROUND"]
