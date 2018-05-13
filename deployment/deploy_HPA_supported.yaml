@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: workshop-web
-        image: dockerweb-image:v2
+        image: dialogdev/dockerweb-image:v2  
         resources:
           requests:
             cpu: 200m

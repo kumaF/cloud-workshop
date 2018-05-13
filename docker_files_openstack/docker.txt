@@ -3,6 +3,23 @@
 docker build -f <file_name> -t <image_name>:<tag>  .
 (e.g - docker build -f dockerfile2 -t dockerweb-image:v2  . ) 
 
-//run image
+//login docker hub account with username and password
+
+docker login
+
+//build version 1 image and push to docker hub 
+
+docker build -f dockerfile1 -t dialogdev/dockerweb-image:v1 .
+docker push dialogdev/dockerweb-image:v1 
+
+
+//build version 2 image and push to docker hub 
+docker build -f dockerfile2 -t dialogdev/dockerweb-image:v2 .  
+docker push dialogdev/dockerweb-image:v2
+
+
+//run container with dockerhub image do it on other node
+
 docker run --name <name_container> -d -ti  -p <host_port>:<container_port> <image_name>:<tag>
-(e.g - docker run -d -ti  -p 8092:80 dockerweb-image:v2  ) 
+(e.g - docker run -d -ti  -p 8092:80 dialogdev/dockerweb-image:v2  )    
+(e.g - docker run -d -ti  -p 8091:80 dialogdev/dockerweb-image:v1 )
