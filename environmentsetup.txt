@@ -1,0 +1,279 @@
+1//root user (only for openstack vms)
+
+sudo su root
+
+2//edit yum.conf to use behind proxy (only for openstack vms) 
+
+proxy=http://10.58.74.77:8080
+
+
+3//Add below contnet to wgetrc file (only for openstack vms)
+
+sudo vi  ~/.wgetrc
+
+use_proxy=yes
+http_proxy=10.58.74.77:8080
+https_proxy=10.58.74.77:8080
+
+4//use proxy as an  enviornment variables put below lines (only for openstack vms)
+
+sudo vi /etc/environment
+
+export http_proxy="http://10.58.74.77:8080/"
+export https_proxy="http://10.58.74.77:8080/"
+export ftp_proxy=="http://10.58.74.77:8080/"
+export no_proxy="127.0.0.1, master_ip, node_ip"
+
+
+5//apply environment variable changes  (only for openstack vms)
+
+source /etc/environment
+
+
+6//clone git repository (for all users all nodes)
+
+sudo mkdir /home/git
+cd /home/git
+sudo yum -y install git
+sudo git clone https://github.com/sambestsolutions/cloud-workshop.git
+
+
+
+7//disable firewalld (for all users all nodes)
+
+sudo systemctl disable firewalld && sudo systemctl stop firewalld
+
+8//disable selinux  (for all users all nodes)
+
+sudo vi /etc/selinux/config
+
+
+9//disable swap (for all users all nodes) 
+
+sudo swapoff -a
+
+10//disable swap and make it permanant (comment swap line with #) (only for virtual box users all nodes)
+
+sudo vi /etc/fstab   
+
+11//reboot to apply all the changes
+
+sudo reboot
+
+
+12//install docker (for all users all nodes)
+
+sudo yum install -y docker
+sudo systemctl enable docker && sudo systemctl start docker
+
+13//set docker to use proxy (only for openstack vms all nodes) 
+
+sudo vi /etc/sysconfig/docker  (append line  -   http_proxy=http://10.58.74.77:8080)
+sudo systemctl restart docker
+
+14//verify docker operation (for all users all nodes)
+
+sudo docker version
+sudo docker search mongo
+
+15//run ubuntu container and attach to container this will exit once exit from container (for all users one node)
+
+sudo docker run -it ubuntu /bin/bash 
+
+16//run container in background so won't exist (for all users one node)
+
+sudo docker run -d -it ubuntu /bin/bash 
+
+17//connect and move into container (for all users one node)
+
+sudo docker exec -ti <container_id> /bin/bash
+
+18//exit from container
+type "exit" and enter or ctrl+d 
+
+19//stop and remove container (for all users one node)
+
+sudo docker stop <container_id>
+sudo docker rm <container_id>
+
+
+20//attach volume from docker host to container ( for all users one node)
+
+sudo docker run -d -ti -v /tmp/:/tmp centos
+
+
+21//we cloned git in step 6 for openstack users use files in directory "docker_files_openstack" and for other use docker_files
+// create 2 image versions using dockerfile1 and dockerfile2 and use docker.txt for commands
+
+///////////commands for virtual box users
+
+sudo docker login
+
+cd /home/git/cloud-workshop/docker_files
+
+docker build -f dockerfile1 -t <docker_hub_user>/dockerweb-image:v1 .
+docker push <docker_hub_user>/dockerweb-image:v1
+
+
+docker build -f dockerfile2 -t <docker_hub_user>/dockerweb-image:v2 .
+docker push <docker_hub_user>/dockerweb-image:v2
+
+//execute on other docker host
+docker run -d -ti  -p 8092:80 <docker_hub_username>/dockerweb-image:v2 
+docker run -d -ti  -p 8091:80 <docker_hub_username>/dockerweb-image:v1
+
+///////////commands for openstack users
+
+sudo docker login
+
+cd /home/git/cloud-workshop/docker_files_openstack
+
+sudo docker build -f dockerfile1 -t <docker_hub_user>/dockerweb-image:v1 .
+docker push <docker_hub_user>/dockerweb-image:v1
+
+docker build -f dockerfile2 -t <docker_hub_user>/dockerweb-image:v2 .
+docker push <docker_hub_user>/dockerweb-image:v2
+
+//execute on other docker host
+docker run -d -ti  -p 8092:80 <docker_hub_username>/dockerweb-image:v2
+docker run -d -ti  -p 8091:80 <docker_hub_username>/dockerweb-image:v1 
+
+//install kubernetes
+ 
+
+22//enable kubernetes packages (on all nodes)
+
+sudo bash -c 'cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF'
+
+23//install kubernetes packages (on all nodes)
+sudo yum install -y kubelet kubeadm kubectl
+
+24//enable and start kubernetes service (on all nodes)
+sudo systemctl enable kubelet && sudo systemctl start kubelet
+
+25//set IP tables parameters (on all nodes) 
+
+cat <<EOF >  /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+
+
+26//apply above changes (on all nodes) 
+
+sysctl --system
+
+
+27//initialize cluster (on master node)
+
+//for virtual box
+sudo kubeadm init  --apiserver-advertise-address=<master_nat_ip>  --pod-network-cidr 10.244.0.0/16    
+
+
+//for openstack users
+sudo kubeadm init --pod-network-cidr 10.244.0.0/16    
+
+
+
+28//use output above to configure folders on master node
+
+//use join on worker node
+
+
+29//pod networking (on master)
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-rbac.yml
+
+30//wait for some time and check health and deployments (on master)
+
+sudo kubectl get cs
+sudo kubectl get pods --all-namespaces
+sudo kubectl get svc --all-namespaces
+
+
+31//use step 6 cloned git repository (on master)
+cd /home/git/cloud-workshop
+
+32//create dashboard (on master)
+sudo kubectl create -f ./dashboard/
+
+33//wait until dashboard is created and get secret token (on master)
+
+kubectl -n kube-system get secret | grep kubernetes-dashboard-admin
+kubectl describe -n kube-system secret/kubernetes-dashboard-admin-token-<user_specific>
+
+34//and use the generated token and use for login to the dashboard find node port of dashboard with (on master)
+
+kubectl get svc --all-namespaces
+
+ 
+35//use firefox to login (on your laptop)
+
+https://<ip>:<service_node_port>   
+
+
+36//create heapster for resourse usage monitoring (on master)
+
+sudo kubectl create -f ./heapster/
+
+
+37//verify heapster operation (on master)
+
+sudo kubectl top pods --all-namespaces
+sudo kubectl top nodes 
+
+38//for openstack vm users comment all proxy related lines in below file (on master)
+ 
+sudo vi /etc/kubernetes/manifests/kube-apiserver.yaml
+
+39//heapster can not get metrices add below line to the end of commands (on master all users)
+
+sudo vi /etc/kubernetes/manifests/kube-controller-manager.yaml
+
+- --horizontal-pod-autoscaler-use-rest-clients=false   
+
+40//reboot after doing changes (for all users master node) 
+sudo reboot
+
+
+
+41//edit image in yaml files use dockerhub account username  (on master)
+
+sudo vi /home/git/cloud-workshop/deployment/deploy_HPA_supported.yaml
+sudo vi /home/git/cloud-workshop/deployment/custom_docker_deploy.yaml
+
+
+42//Create deployment with deploy_HPA_supported.yaml (on master)
+
+sudo kubectl create -f /home/git/cloud-workshop/deployment/deploy_HPA_supported.yaml
+
+43//can access via any node port of any node in cluster
+
+curl node_ip:30080
+
+44//autoscale deployment use command in supporting function (master)
+
+kubectl autoscale deployment workshop-deployment --cpu-percent=10 --min=1 --max=4
+
+
+
+45//rolling update create deployment with below yaml file (master)
+
+sudo kubectl create -f /home/git/cloud-workshop/deployment/custom_docker_deploy.yaml
+
+46//use different image (master)
+
+sudo kubectl set image deployment/workshop-deployment-rolling-update workshop-web-update=docker_hub_username/dockerweb-image:v1
+
+47//check rollout status (master)
+sudo kubectl rollout status deployment/workshop-deployment-rolling-update

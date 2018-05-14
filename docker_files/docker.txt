@@ -1,8 +1,4 @@
 
-//build image 
-docker build -f <file_name> -t <image_name>:<tag>  .
-(e.g - docker build -f dockerfile2 -t dockerweb-image:v2  . ) 
-
 //login docker hub account with username and password
 
 docker login

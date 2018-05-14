@@ -5,7 +5,7 @@ metadata:
   labels:
     name: workshop-web-update
 spec:
-  replicas: 5
+  replicas: 10
   selector:
     matchLabels:
       name: workshop-web-update
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: workshop-web-update
-        image: dialogdev/dockerweb-image:v2
+        image: dialogdev/dockerweb-image:v1
         ports:
         - containerPort: 80
 
