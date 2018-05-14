@@ -1,3 +1,3 @@
 <?php
-echo "Dialog Development V2.0 served container - " .gethostname();
+echo "Hello I'm the second- " .gethostname();
 ?>

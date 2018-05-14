@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: workshop-deployment
+  name: workshop-deployment-rolling-update
   labels:
-    name: workshop-web
+    name: workshop-web-update
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
-      name: workshop-web
+      name: workshop-web-update
   template:
     metadata:
       labels:
-        name: workshop-web
+        name: workshop-web-update
     spec:
       containers:
-      - name: workshop-web
+      - name: workshop-web-update
         image: dialogdev/dockerweb-image:v2
         ports:
         - containerPort: 80
@@ -24,14 +24,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: workshop-web
+  name: workshop-web-update
   labels:
-    name: workshop-web
+    name: workshop-web-update
 spec:
   type: NodePort
   ports:
     - port: 80
-      nodePort: 30080
+      nodePort: 30081
       name: http
   selector:
-    name: workshop-web
+    name: workshop-web-update
