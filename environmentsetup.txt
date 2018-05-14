@@ -273,7 +273,7 @@ sudo kubectl create -f /home/git/cloud-workshop/deployment/custom_docker_deploy.
 
 46//use different image (master)
 
-sudo kubectl set image deployment/workshop-deployment-rolling-update workshop-web-update=docker_hub_username/dockerweb-image:v1
+sudo kubectl set image deployment/workshop-deployment-rolling-update workshop-web-update=docker_hub_username/dockerweb-image:v2
 
 47//check rollout status (master)
 sudo kubectl rollout status deployment/workshop-deployment-rolling-update
