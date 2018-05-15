@@ -80,7 +80,7 @@ sudo docker search mongo
 
 sudo docker run -it ubuntu /bin/bash 
 
-16//run container in background so won't exist (for all users one node)
+16//run container in background so won't exit (for all users one node)
 
 sudo docker run -d -it ubuntu /bin/bash 
 
